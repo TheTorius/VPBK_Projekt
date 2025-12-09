@@ -748,6 +748,15 @@ const delay = (delayInms) => {
 };
 
 async function showExample(){
+
+    log = document.getElementById("Desifrace").innerHTML="";
+    log1 = document.getElementById("Desifrace1").innerHTML="";
+    log2 = document.getElementById("Desifrace2").innerHTML="";
+    log3 = document.getElementById("Desifrace3").innerHTML="";
+    log4 = document.getElementById("Desifrace4").innerHTML="";
+    log5 = document.getElementById("Desifrace5").innerHTML="";
+    log6 = document.getElementById("Desifrace6").innerHTML="";
+
     SelectedTable = document.getElementById("ShowTable")
 
     SelectedTable.innerHTML =`<thead>
