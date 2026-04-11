@@ -101,17 +101,107 @@
                                     <li>
                                         Jako hardwarové zařízení, které nám pro získávání radiofrekvenčně poslaných klíčů nám poslouží SDR-V2 (FC0013), který je formou USB připojeného zařízení a anténou jako příjímačem.
                                     </li>
-                                    <div style="display: flex; justify-content: center; align-items: center;">
+                                    <div style="display: flex; justify-content: center; align-items: center; flex-direction: column; width: 100%; margin-bottom: 15px; margin-top: 15px;">
                                         <img src="sdr-image.jpg" width="20%;">
+                                        <div style="margin-top: 15px;">
+                                            Obrázek 1: RTL-SDR přijímač
+                                        </div>
+                                        
                                     </div>
                                     <li>
-                                        Operační systémy, na kterých jsme se snažili tento hardware rozchodit, byl Linuxovou distribucí Ubuntu a Windows 11.
+                                        Operační systém, na kterém jsme se snažili tento hardware rozchodit, byl Windows 11 od společnosti Microsoft.
+                                    </li>
+                                    <li>
+                                        V rámci testování, zda-li nám tento přípravek správně funguje jsme si stáhli ovladače pro RTL na USB a zároveň s tím program, kde jsme si mohli tento přípravek otestovat. Tento program se jmenuje <b>SDR Sharp</b>, kde jsme si nastavili hledanou frekvenci 433.92MHz a několikrát jsme na našem dálkovém ovladači klikli na tlačítko pro odemčení a zamčení automobilu.
+                                    </li>
+                                </ul>
+                                <br>
+
+                                <div class="noteblock">
+                                    <h2>Hledaná frekvence</h2>
+                                    <ul>
+                                        <li>U automobilových vozidel je frekvence klíčů nastavena vždy stejně, avšak záleží na typu modelu.</li>
+                                        <li>Máme dva typy modulací, které u automobilů rozpoznáváme, tím jsou <b>FSK (Frekvenční modulace)</b> a <b>ASK (Amplitudová modulace)</b></li>
+                                        <ul>
+                                            <li>
+                                                V případě frekvenční modulace je frekvence nastavená na 433.92MHz, přičemž se velmi často u těchto klíčů rozpoznává 0 a 1 podle toho, že jejich frekvence se mírně liší. Konkrétně je frekvence 0 často nastavována na 433.87MHz a pro logickou jedničku 433.92MHz.
+                                            </li>
+                                            <li>
+                                                V případě amplitudové modulace je použita frekvence 433MHz rovných.
+                                            </li>
+                                        </ul>
+                                    </ul>
+                                </div>
+                                <br>
+
+                                <ul>
+                                    <li>
+                                        Pro snímání kódu poslaného z dálkového ovladače jsme použili open-source kód taktéž zvaný jako <b>Universal Radio Hacker</b>. Tento software dokáže jak detekovat na dané frekvenci poslaný kód automobilového klíče, tak jej i částečně rozluštit a přečíst jednotlivé zprávy, které klíč posílá.
+                                    </li>
+                                </ul>
+
+                                <div class="noteblock" style="margin-top: 15px;">
+                                    <h2>Dacia Duster 2022</h2>
+                                    <ul>
+                                        <li>
+                                            Automobil Dacia Duster z roku 2022, na kterém jsme tento projekt testovali, má ve svém klíči zakomponované následující prvky:
+                                        <ul>
+                                            <li>
+                                                Tento model ve svém klíči využívá čip s moderním šifrováním ve formě AES, konkrétně se jedná o Hitag AES od společnosti NXP. 
+                                            </li>
+                                            <li>
+                                                Tento čip využívá 128bitový standard kódování AES, přičemž kódy, které tento klíč posílá vzduchem k autu je kódován pomocí <b>Manchester</b>. Další kódování, které se však u automobilových klíčů nepoužívají jsou <b>Non Return To Zero</b> nebo třeba <b>Non Return To Zero Inverted</b>.
+                                            </li>
+                                            <li>
+                                                Odeslaná zpráva tímto klíčem by měla být rozdělená do následujících částí:
+                                                <ul>
+                                                    <li>
+                                                        Hlavička synchronizace (Preamble): Tato část by měla mít 16 až 32 bitů a slouží pro probuzení příjímače v autě.
+                                                    </li>
+                                                    <li>
+                                                        Sériové číslo (UID): Tato část je složená ze 32 bitů a slouží nám pro identifikace klíče pro to dané auto.
+                                                    </li>
+                                                    <li>
+                                                        Stav tlačítek (Povel): Tato část je 4-8 bitová a jednoznačně identifikuje jaký povel byl autu poslán.
+                                                    </li>
+                                                    <li>
+                                                        Otevřený čítač (Noance/Counter): Část o 16 až 32 bitech, která slouží jako počitadlo odeslaných rámců autu.
+                                                    </li>
+                                                    <li>
+                                                        Kryptografický podpis (MAC - Message Authentication Code): Většinou 32, 48 nebo 64 bitový string což je šifrou AES. Rolling Code.
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                                <ul style="margin-top: 15px; margin-bottom: 15px;">
+                                    <li>
+                                        Bohužel se však klíč od auta nedá jen tak lehce ukrást a to právě díky tomu, že moderní automobilové klíče obsahují šifrování ve formě AES a Rolling Code mechanismu, který zaručuje generaci "pseudounikátní" kód, který se každým stisknutím mění.
                                     </li>
                                 </ul>
 
                                 <div class="noteblock">
+                                    <h2>Rolling Code</h2>
                                     <ul>
-
+                                        <li>
+                                            Rolling Code je typ šifrování, který se u dnešních moderních používá. Jedná se pseudonáhodný generátor čísel, který je šifrován a nedá se předvídat jeho následující kód.
+                                        </li>
+                                        <li>
+                                            Tento klíč se používá jako základní ochrana proti odposouchávání komunikace auta a dálkového ovladače.
+                                        </li>
+                                        <li>
+                                            Na následujícím obrázku lze vidět grafické znázornění, jak tento kód funguje.
+                                        </li>
+                                        <div style="display: flex; justify-content: center; align-items: center; flex-direction: column; width: 100%; margin-bottom: 15px; margin-top: 15px;">
+                                        <img src="rolling-code-explanation.png" width="50%;">
+                                        <div style="margin-top: 15px;">
+                                            Obrázek 2: Rolling Code znázornění
+                                        </div>
+                                        
+                                    </div>
                                     </ul>
                                 </div>
                             </div>
@@ -157,6 +247,10 @@
                                 style="all: unset; cursor: pointer;">
                                 https://m.media-amazon.com/images/I/61vpNX7rLNL._AC_.jpg
                             </a></li>
+                            <li><a style="all: unset; cursor: pointer;" href="https://0x44.cc/radio/2024/03/13/reversing-a-car-key-fob-signal.html">https://0x44.cc/radio/2024/03/13/reversing-a-car-key-fob-signal.html</a></li>
+                            <li>
+                                <a style="all: unset; cursor: pointer;" href="https://en.wikipedia.org/wiki/Rolling_code">https://en.wikipedia.org/wiki/Rolling_code</a>
+                            </li>
                         </ul>
                     </div>
                 </div>
