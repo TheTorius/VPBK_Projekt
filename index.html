@@ -16,18 +16,34 @@
     body[data-color='dark'] .card {
         color: black;
     }
+
+    article {
+    /* Vytvoří masku, která je nahoře (0-5%) a dole (95-100%) průhledná */
+    -webkit-mask-image: linear-gradient(to bottom, 
+        transparent 0%, 
+        black 15%, 
+        black 85%, 
+        transparent 100%
+    );
+    mask-image: linear-gradient(to bottom, 
+        transparent 0%, 
+        black 15%, 
+        black 85%, 
+        transparent 100%
+    );
+    }
 </style>
 
 <body>
     <header
-        style="background-image: url('./images/logo.png'); background-repeat: no-repeat; background-position: center center; background-size: 30%;">
+        style="background-image: url('./images/logo.png'); background-repeat: no-repeat; background-position: center center; background-size: 30%; border-color: black; border-style: solid; border-width: 0px 0px 2px 0px; ">
         <div class="header-brand"></div>
         <div class="header-left">
             <nav>
                 <ul>
                     <li><a href="#theory">Informatický základ</a></li>
                     <li><a href="#practice">Praktické ukázání</a></li>
-                    <li><a href="#presentation">Prezentace</a></li>
+                    <li><a href="#zdroje">Zdroje</a></li>
                 </ul>
             </nav>
         </div>
@@ -49,12 +65,14 @@
                             <div class="col-1"></div>
                             <div class="col-10">
                                 <p>
-                                    &emsp; Zde se nachází zadání projektu, které jsme si vybrali, tento projekt
-                                    pojednává o Methods and technologies for SRTP
-                                    media stream decryption neboli "Metody a technologie pro SRTP šifrování vysílaných
-                                    obsahů" a jedná se o zadání číslo 5.
-                                </p>
-                                <embed src="./project_1_v1.pdf" width="100%" style="margin-top: 15px; height: 30em;">
+                                    &emsp; V rámci předmětu Vybrané partie z bezpečnosti komunikací (VPBK) jsme si vybrali projekt
+                                    pojednávající o analýze rádiofrekvenčního kódování dálkového ovladače od Ing. Martin Tomis, Ph.D.
+                                    a jedná se o téma č. 2.<br>
+
+                                    &emsp; V rámci tohoto tématu jsme si vybrali analýzu dálkového ovladače od auta. Jedná se o pokus získání
+                                    klíče, který tento ovladač vysílá pro jeho odemčení a zjištění klíče následujícího.
+                                </p>    
+                                <embed src="./project.pdf" width="100%" style="margin-top: 15px; height: 28em;">
                             </div>
                             <div class="col-1"></div>
                         </div>
@@ -69,7 +87,7 @@
             <div class="col-10">
                 <div class="card">
                     <div class="card-header">
-                        Methods and technologies for SRTP media stream decryption.
+                        Analýza kódování RF dálkového ovladače
                     </div>
                     <div class="card-body">
                         <div class="row">
@@ -79,175 +97,8 @@
                                     <h2 id="theory">Informatický základ</h2>
                                 </u><br>
                                 <div class="noteblock">
-                                    <h4>Co je to SRTP</h4>
-                                    <ul>
-                                        <li>Secure Real-time Transport Protocol (SRTP) je rozšíření protokolu RTP
-                                            (Real-time Transport Protocol), který poskytuje zabezpečení pro přenos
-                                            multimediálních dat v reálném čase přes IP sítě. SRTP přidává funkce jako
-                                            šifrování, autentizaci a ochranu proti opakování, aby zajistil integritu a
-                                            důvěrnost přenášených dat.</li>
-                                        <li>SRTP je navržen tak, aby byl kompatibilní s existujícím RTP protokolem, což
-                                            umožňuje jeho snadnou integraci do existujících aplikací a služeb, které
-                                            používají RTP pro přenos hlasu, videa a jiných multimediálních dat.</li>
-                                    </ul>
-
-                                    <br>
-                                    <h4>Režimy šifrování</h4>
-                                    <ul>
-                                        <li>
-                                            <h4>SICM (Segment Integer Counter Mode)</h4>
-                                            <ul>
-                                                <li>Šifrovací režim používaný v SRTP pro šifrování RTP payloadu.</li>
-                                                <li>Využívá AES (Advanced Encryption Standard) v režimu CTR (Counter
-                                                    Mode).</li>
-                                                <li>Každý RTP paket je šifrován pomocí unikátního nonce, který je
-                                                    odvozen z SSRC, sekvenčního čísla a dalších polí RTP hlavičky.
-                                                </li>
-                                                <li>Zajišťuje důvěrnost dat tím, že každý paket je šifrován jiným
-                                                    klíčem.</li>
-                                                <li>Umožňuje efektivní a rychlé šifrování a dešifrování dat v reálném
-                                                    čase.</li>
-                                            </ul>
-                                        </li>
-                                        <li>
-                                            <h4>F8 (F8 mode)</h4>
-                                            <ul>
-                                                <li>Alternativní šifrovací režim, který může být použit v SRTP.</li>
-                                                <li>Navržen pro specifické aplikace, kde je potřeba odlišný přístup k
-                                                    šifrování než ten, který nabízí SICM.</li>
-                                                <li>Méně běžně používaný než SICM, ale stále podporovaný v rámci SRTP.
-                                                </li>
-                                                <li>Poskytuje další možnosti pro zabezpečení multimediálních dat v
-                                                    reálném čase.</li>
-                                            </ul>
-                                        </li>
-                                    </ul>
-
-                                    <br>
-                                    <h4>Formát klíče a odvozené klíče (master key, master salt, session keys)</h4>
-                                    <ul>
-                                        <li><strong>Master Key 16 B (128 bitů):</strong> Hlavní klíč používaný k
-                                            odvození dalších klíčů. Měl by být dostatečně
-                                            dlouhý a náhodný, aby zajistil bezpečnost.</li>
-                                        <li><strong>Master Salt 14 B (112 bitů):</strong> Náhodná hodnota používaná
-                                            spolu s master key k odvození dalších
-                                            klíčů. Pomáhá zvýšit bezpečnost tím, že přidává další vrstvu náhodnosti.
-                                        </li>
-                                        <li><strong>Session Keys 14 B (112 bitů):</strong> Klíče odvozené z master key a
-                                            master salt, které se používají pro
-                                            šifrování a autentizaci jednotlivých mediálních toků. Každý tok může mít
-                                            svůj
-                                            vlastní session key.</li>
-                                        <li><strong>Encryption key 16 B (128 bitů):</strong> Slouží k šifrování RTP
-                                            datového obsahu (payload) pomocí AES v režimu CTR (AES Counter Mode).</li>
-                                        <li><strong>Authentication key 20 B (160 bitů):</strong>Používá se k ověření
-                                            integrity a autenticity paketů (vytváření HMAC-SHA1 tagu).</li>
-                                    </ul>
-                                    <br>
-                                    <h4>Jak se klíče odvozují (KDF) a odvození klíčů (RFC3711)</h4>
                                     <ul>
 
-                                    </ul>
-                                </div>
-
-
-                                <br>
-                                <table class="table table-striped">
-                                    <tbody>
-                                        <tr>
-                                            <td colspan="6">
-                                                <h4>Co se koduje v SRTP</h4>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>Část paketu</th>
-                                            <th>Šifrováno?</th>
-                                            <th>Šifrovací klíč</th>
-                                            <th>Autentizováno?</th>
-                                            <th>Autentifikační klíč</th>
-                                            <th>Poznámky</th>
-                                        </tr>
-
-
-                                        <tr>
-                                            <td><strong>RTP header</strong><br />(verze, PT, sequence,
-                                                timestamp, SSRC, atd.)</td>
-                                            <td>Ne (zpravidla zůstává v plaintextu)</td>
-                                            <td>—</td>
-                                            <td>Ano (vybrané header fieldy jsou součástí HMAC)</td>
-                                            <td class="mono">K<sub>a</sub> (authentication key)</td>
-                                            <td>RTP header není běžně šifrován; je však zahrnut do
-                                                autentizačního výpočtu (HMAC) tak, aby se zabránilo manipulaci s
-                                                klíčovými poli (SSRC, SEQ, ...).</td>
-                                        </tr>
-
-                                        <tr>
-                                            <td><strong>RTP payload</strong><br />(media — např. kodek
-                                                audio/video)</td>
-                                            <td>Ano</td>
-                                            <td class="mono">K<sub>e</sub> (encryption key)</td>
-                                            <td>Ano (po šifrování se payload i další položky autentizují)</td>
-                                            <td class="mono">K<sub>a</sub> (authentication key)</td>
-                                            <td>Payload je šifrován AES-CM (CTR) pomocí <span
-                                                    class="mono">K<sub>e</sub></span>. Po šifrování se výsledný
-                                                ciphertext spolu s příslušnými header poli a ROC zahrne do HMAC.
-                                            </td>
-                                        </tr>
-
-                                        <tr>
-                                            <td><strong>SRTP authentication tag (ICV / HMAC)</strong></td>
-                                            <td>Ne (tag je přidán na konec paketu)</td>
-                                            <td>—</td>
-                                            <td>— (tag je výsledkem autentizace)</td>
-                                            <td class="mono">K<sub>a</sub> (HMAC-SHA1)</td>
-                                            <td>Tag (např. 80 bitů u AES_CM_128_HMAC_SHA1_80) je výstup HMAC a
-                                                slouží k ověření integrity a autenticity paketu. Tag se připojí
-                                                za SRTP paket.</td>
-                                        </tr>
-
-                                        <tr>
-                                            <td><strong>IV / nonce pro AES-CTR</strong></td>
-                                            <td>— (IV není šifrován, je použit při šifrování)</td>
-                                            <td class="mono">K<sub>s</sub> (session salt)</td>
-                                            <td>—</td>
-                                            <td>—</td>
-                                            <td>IV/nonce se konstruuje z <span class="mono">K<sub>s</sub></span>
-                                                + RTP polí (SSRC, SEQ, ROC). Správné sestavení IV zajišťuje
-                                                unikátnost nonce pro každý paket.</td>
-                                        </tr>
-
-                                        <tr>
-                                            <td><strong>MKI (Master Key Identifier)</strong></td>
-                                            <td>Ne (atribut/identifikátor)</td>
-                                            <td>—</td>
-                                            <td>Je součástí autentikace, pokud je použit</td>
-                                            <td class="mono">K<sub>a</sub></td>
-                                            <td>Krátký identifikátor (1-4 B) použitý k identifikaci, který
-                                                master key má přijímač použít (u rekeyingu nebo paralelních
-                                                klíčů).</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-
-                                <br>
-                                <div class="noteblock">
-                                    <h4>Výměna klíče SRTP (Pomocí Diffie-Hellman)</h4>
-                                    <ul>
-                                        <li>Diffie-Hellman (DH) je kryptografický protokol, který umožňuje dvěma stranám
-                                            bezpečně vyměnit šifrovací klíče přes nezabezpečený kanál.</li>
-                                        <li>Obě strany si nejprve dohodnou na veřejných parametrech, jako je velké
-                                            prvočíslo a
-                                            generátor.</li>
-                                        <li>Každá strana si poté vygeneruje svůj soukromý klíč a vypočítá svůj veřejný
-                                            klíč pomocí dohodnutých parametrů.</li>
-                                        <li>Veřejné klíče jsou následně vyměněny mezi oběma stranami.</li>
-                                        <li>Každá strana pak použije svůj soukromý klíč a veřejný klíč druhé strany k
-                                            výpočtu sdíleného tajemství, které je identické pro obě strany.</li>
-                                        <li>Toto sdílené tajemství je následně použito k odvození šifrovacích klíčů pro
-                                            zabezpečenou komunikaci.</li>
-                                        <li>Výhodou DH je, že i když je výměna klíčů zachycena třetí stranou, bez
-                                            znalosti soukromých klíčů obou stran nemůže být sdílené tajemství
-                                            vypočítáno.</li>
                                     </ul>
                                 </div>
                             </div>
@@ -264,107 +115,8 @@
                             <div class="col-1"></div>
                             <div class="col-10">
                                 <u>
-                                    <h2 id="practice">Praktické ukázání</h2>
-                                </u>
-                                <br>
-                                <table class="table table-bordered table-striped">
-                                    <thead class="table-dark">
-                                        <tr>
-                                            <th colspan="6" class="text-center fs-4">Kdy a jak rychle jde DH prolomit v
-                                                praxi (2025)</th>
-                                        </tr>
-                                        <tr>
-                                            <th>Velikost modulu p</th>
-                                            <th>Název skupiny</th>
-                                            <th>Čas prolomení diskrétního logaritmu (2025)</th>
-                                            <th>Kdo to dokáže</th>
-                                            <th>Poznámka</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr class="table-danger">
-                                            <td>≤ 512 bitů</td>
-                                            <td>„toy“</td>
-                                            <td>milisekundy až vteřiny na běžném notebooku</td>
-                                            <td>kdokoli s Pythonem</td>
-                                            <td>Prolomitelný okamžitě</td>
-                                        </tr>
-                                        <tr class="table-warning">
-                                            <td>768 bitů</td>
-                                            <td>slabé</td>
-                                            <td>několik minut až hodin</td>
-                                            <td>student, hobby</td>
-                                            <td>Už se to nedoporučuje</td>
-                                        </tr>
-                                        <tr class="table-warning">
-                                            <td>1024 bitů</td>
-                                            <td>legacy</td>
-                                            <td>několik měsíců až 1-2 roky<br><small>s velmi dobrým HW/SW</small></td>
-                                            <td>univerzity, menší firmy</td>
-                                            <td>V roce 2015-2020 se to ještě používalo</td>
-                                        </tr>
-                                        <tr class="table-success">
-                                            <td>2048 bitů</td>
-                                            <td>standard (2025)</td>
-                                            <td>desítky až stovky let<br><small>i při masivním nasazení GPU/ASIC</small>
-                                            </td>
-                                            <td>žádná známá veřejná síla</td>
-                                            <td>Bezpečné proti klasickým počítačům</td>
-                                        </tr>
-                                        <tr class="table-success">
-                                            <td>3072-4096 bitů</td>
-                                            <td>paranoidní / vládní</td>
-                                            <td>tisíce až miliony let</td>
-                                            <td>nikdo</td>
-                                            <td>Používá se v některých státních systémech</td>
-                                        </tr>
-                                        <tr class="table-info">
-                                            <td>Eliptické křivky<br>(256 bitů ECDH)</td>
-                                            <td>moderní standard<br>(TLS 1.3, Signal, WhatsApp)</td>
-                                            <td>stejná nebo vyšší bezpečnost<br>než 3072-4096 bitů klasického DH</td>
-                                            <td>nikdo<br><small>(pokud není backdoor v křivce)</small></td>
-                                            <td>Dnes nejčastější a nejlepší volba</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                <br>
-                                <div class="noteblock">
-                                    <h4>Implementační poznámky</h4>
-                                    <ul>
-
-                                    </ul>
-                                    <h4>Diagram výměny klíče</h4>
-                                    <img src="./images/DiffieHellman.png" alt="SRTP Diagram"
-                                        style="width:100%; margin-top:2%;">
-
-                                </div>
-
-                                <br>
-                                <u>
-                                    <h2>Ukázka odchytnutí klíče a jeho zpětné sestavení</h2><br>
-                                </u>
-                                <select id="ExampleSelect" class="form-select" onchange="changeExample()" autocomplete="off">
-                                    <option value="0" selected>-- Vyberte příklad --</option>
-                                    <option value="16">Příklad 1: Malý modul p (16 bitů)</option>
-                                    <option value="32">Příklad 2: Střední modul p (32 bitů)</option>
-                                    <option value="64" disabled>Příklad 3: Vetší modul p (64 bitů)[JavaScript padne]</option>
-                                    <option value="215" disabled>Příklad 4: Velký modul p (215 bitů)[JavaScript padne]</option>
-                                </select>
-                                <button class="form-btn" style="margin-bottom: 10px;" onclick="showExample()">Zobrazit příklad</button>
-                                <table id="ShowTable" class="table table-striped">
-                                </table>
-                                <u>
-                                    <br><h2>Dešifrace klíče</h2><br>
-                                </u>
-                                <ul>
-                                    <div id="Desifrace"></div>
-                                    <div id="Desifrace1"></div>
-                                    <div id="Desifrace2"></div>
-                                    <div id="Desifrace3"></div>
-                                    <div id="Desifrace4"></div>
-                                    <div id="Desifrace5"></div>
-                                    <div id="Desifrace6"></div>
-                                </ul>
+                                    <h2 id="practice">Praktická ukázka</h2>
+                                </u><br>
                             </div>
                             <div class="col-1"></div>
                         </div>
@@ -378,7 +130,7 @@
             <div class="col-1"></div>
             <div class="col-10">
                 <div class="card">
-                    <div class="card-header">
+                    <div id="zdroje" class="card-header">
                         Zdroje
                     </div>
                     <div class="card-body">
@@ -402,11 +154,11 @@
         </a>
     </article>
 
-    <footer>
+    <footer style="border-color: black; border-style: solid; border-width: 2px 0px 0px 0px;">
         <div class="footer-tools"><i class="bi bi-javascript"></i><i class="bi bi-css" style="margin-left:2%;"></i>
         </div>
         <div class="footer-redirect"><img src="./images/minitCSS_bg.png" width="23%"></div>
-        <div class="footer-copyright">&copy Bc. Lukáš Horák & Bc. Jakub Krčmář</div>
+        <div class="footer-copyright">&copy Bc. Zuzana Baluchová & Bc. Lukáš Horák</div>
     </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
