@@ -136,7 +136,7 @@
 
                                 <ul>
                                     <li>
-                                        Pro snímání kódu poslaného z dálkového ovladače jsme použili open-source kód taktéž zvaný jako <b>Universal Radio Hacker</b>. Tento software dokáže jak detekovat na dané frekvenci poslaný kód automobilového klíče, tak jej i částečně rozluštit a přečíst jednotlivé zprávy, které klíč posílá.
+                                        Pro snímání kódu poslaného z dálkového ovladače jsme použili open-source kód taktéž zvaný jako <b>Universal Radio Hacker</b>. Tento software dokáže jak detekovat na dané frekvenci poslaný kód automobilového klíče, tak jej i částečně dekódovat a přečíst jednotlivé zprávy, které klíč posílá.
                                     </li>
                                 </ul>
 
@@ -150,25 +150,31 @@
                                                 Tento model ve svém klíči využívá čip s moderním šifrováním ve formě AES, konkrétně se jedná o Hitag AES od společnosti NXP. 
                                             </li>
                                             <li>
-                                                Tento čip využívá 128bitový standard kódování AES, přičemž kódy, které tento klíč posílá vzduchem k autu je kódován pomocí <b>Manchester</b>. Další kódování, které se však u automobilových klíčů nepoužívají jsou <b>Non Return To Zero</b> nebo třeba <b>Non Return To Zero Inverted</b>.
+                                                Tento čip využívá 128bitový standard kódování AES, přičemž kódy, které tento klíč posílá vzduchem k autu je kódován pomocí <b>Manchester II</b>. Další kódování, které se však u automobilových klíčů nepoužívají jsou <b>Non Return To Zero</b> nebo třeba <b>Non Return To Zero Inverted</b>.
                                             </li>
                                             <li>
                                                 Odeslaná zpráva tímto klíčem by měla být rozdělená do následujících částí:
                                                 <ul>
                                                     <li>
-                                                        Hlavička synchronizace (Preamble): Tato část by měla mít 16 až 32 bitů a slouží pro probuzení příjímače v autě.
+                                                        Hlavička synchronizace (Preamble): Tato část má 24 bitů a slouží pro probuzení příjímače v autě.
                                                     </li>
                                                     <li>
                                                         Sériové číslo (UID): Tato část je složená ze 32 bitů a slouží nám pro identifikace klíče pro to dané auto.
                                                     </li>
                                                     <li>
-                                                        Stav tlačítek (Povel): Tato část je 4-8 bitová a jednoznačně identifikuje jaký povel byl autu poslán.
+                                                        Stav tlačítek (Povel): Tato část je 8 bitová a jednoznačně identifikuje jaký povel byl autu poslán.
                                                     </li>
                                                     <li>
-                                                        Otevřený čítač (Noance/Counter): Část o 16 až 32 bitech, která slouží jako počitadlo odeslaných rámců autu.
+                                                        Čítač zpráv (ID zprávy): Tato část má 8 bitů a slouží pro rozlišení pořadí paketů v rámci jednoho vysílání.
+                                                    </li>
+                                                    <li>
+                                                        Sekvenční čítač (Counter): Tato část je složená z 8 bitů a slouží k synchronizaci plovoucího kódu a ochraně proti replay útokům.
                                                     </li>
                                                     <li>
                                                         Kryptografický podpis (MAC - Message Authentication Code): Většinou 32, 48 nebo 64 bitový string což je šifrou AES. Rolling Code.
+                                                    </li>
+                                                    <li>
+                                                        Kontrolní součet (CRC): Tato část je 8 bitová a slouží pro kontrolu integrity dat.
                                                     </li>
                                                 </ul>
                                             </li>
@@ -217,9 +223,126 @@
                         <div class="row">
                             <div class="col-1"></div>
                             <div class="col-10">
-                                <u>
-                                    <h2 id="practice">Praktická ukázka</h2>
-                                </u><br>
+                                <h2 id="practice" style="margin-bottom: 15px;">Praktická ukážka</h2>
+                                <h3>1. Vyhľadanie a overenie frekvencie</h3>
+                                <p>
+                                    &emsp; Prvým krokom v praktickej časti bolo presné lokalizovanie a overenie frekvencie, na ktorej ovládač komunikuje. Na tento účel sme využili softvér <strong>SDR# (Airspy Studio)</strong> v spojení s RTL-SDR prijímačom. 
+                                </p>
+                                
+                                <div style="display: flex; justify-content: center; align-items: center; flex-direction: column; width: 100%; margin-bottom: 15px; margin-top: 15px;">
+                                    <img src="airspy.png" alt="SDR# Analýza frekvencie 433.92MHz" class="img-fluid" style="border: 1px solid #ccc;" width="60%">
+                                    <div style="margin-top: 15px;">
+                                        Obrázok 3: Spektrálny analyzátor SDR# pri stlačení tlačidla na ovládači
+                                    </div>
+
+                                </div>
+
+                                <p>
+                                    &emsp; Sledovaním spektrálneho analyzátora a "vodopádu" (waterfall diagram) sme potvrdili, že kľúč vysiela na štandardnej frekvencii <strong>433,92 MHz</strong>. Pri každom stlačení tlačidla bol v spektre viditeľný zreteľný nárast energie, čo nám overilo, že signál je dostatočne silný a čistý na to, aby sme mohli pristúpiť k jeho zachytávaniu a následnej analýze v programe URH.
+                                </p>
+
+                                <h3 style="margin-top: 15px;">2. Zachytávanie signálu v URH (Universal Radio Hacker)</h3>
+                                <p>
+                                    &emsp; Po úspešnej identifikácii frekvencie sme prešli do programu <strong>URH (Universal Radio Hacker)</strong>. Tento nástroj nám umožnil signál nielen nahrať, ale aj spätne analyzovať jeho digitálnu štruktúru. 
+                                </p>
+                                
+                                <p>
+                                    V rámci praktického pokusu sme vykonali sériu meraní, kde sme zaznamenali:
+                                </p>
+                                <ul>
+                                    <li><strong>4x stlačenie tlačidla pre zamknutie vozidla</strong></li>
+                                    <li><strong>4x stlačenie tlačidla pre odomknutie vozidla</strong></li>
+                                </ul>
+
+                                <div style="display: flex; justify-content: center; align-items: center; flex-direction: column; width: 100%; margin-bottom: 15px; margin-top: 15px;">
+                                    <img src="urh2.png" alt="Zachytené sekvencie signálu v URH" class="img-fluid" style="border: 1px solid #ccc;" width="60%">
+                                    <div style="margin-top: 15px;">
+                                        Obrázok 4: Zachytené sekvencie signálu v URH
+                                    </div>
+                                </div>
+
+                                <h3>3. Automatická detekcia parametrov</h3>
+                                <p>
+                                    &emsp; Surový rádiový signál je pre človeka nečitateľný. Aby sme z neho dostali nuly a jednotky, museli sme určiť správnu <strong>moduláciu</strong> a <strong>Samples/Symbol</strong> (rýchlosť prenosu). 
+                                </p>
+                                
+                                <p>
+                                    &emsp; Využili sme funkciu <strong>"Autodetect parameters"</strong>, ktorú URH ponúka. Program automaticky analyzoval šírku jednotlivých pulzov a silu signálu, čím nastavil optimálnu hranicu (Center) pre rozlíšenie logickej 0 a 1. Na základe analýzy sme zistili, že signál využíva moduláciu <strong>FSK (Frequency Shift Keying)</strong>, čo je typické pre tento druh diaľkových ovládačov.
+                                </p>
+
+                                <p>
+                                    &emsp; Vďaka tomuto kroku sme získali čistý binárny výpis, ktorý sme následne mohli poslať do ďalšej fázy – dekódovania a hľadania štruktúry protokolu.
+                                </p>
+
+                                <h3 style="margin-top: 15px;">4. Analýza štruktúry prenosu (Burst Analysis)</h3>
+                                <p>
+                                    &emsp; Pri detailnom skúmaní nahrávky sme zistili, že jedno krátke stlačenie tlačidla na ovládači nespustí len jeden prenos, ale celú sekvenciu balíkov (burstov). Táto stratégia zabezpečuje, že auto príkaz prijme aj v prípade krátkodobého rušenia.
+                                </p>
+                                
+                                <div style="display: flex; justify-content: center; align-items: center; flex-direction: column; width: 100%; margin-bottom: 15px; margin-top: 15px;">
+                                    <img src="signal.png" alt="Sekvencia signálov pri jednom stlačení" class="img-fluid" style="border: 1px solid #ccc; margin: 20px 0;" width="70%">
+                                    <div>Obrázok 5: Vizualizácia sekvencie: Prebudenie -> Opakované dátové pakety -> "Goodbye" paket.</div>
+                                </div>
+
+                                <p> &emsp; Celý proces komunikácie sme rozdelili na tri kľúčové fázy:</p>
+                                <ul>
+                                    <li><strong>Prebudenie (Wake-up):</strong> Prvotný signál, ktorý slúži na aktiváciu prijímacieho modulu vo vozidle a nastavenie zosilnenia (AGC).</li>
+                                    <li><strong>Dátové pakety (Data Bursts):</strong> Tri identické správy, ktoré nesú samotnú informáciu o ID kľúča a požiadavke (odomknúť/zamknúť). Všimli sme si, že sa v nich menia hodnoty čítačov.</li>
+                                    <li><strong>Ukončovací paket (Goodbye/Release):</strong> Posledná, často kratšia správa, ktorá je vyslaná v momente uvoľnenia tlačidla a signalizuje koniec komunikácie.</li>
+                                </ul>
+
+                                <h3 style="margin-top: 15px;">5. Identifikácia a mapovanie dátových polí</h3>
+                                <p>
+                                    &emsp; V záložke <strong>Analysis</strong> sme pristúpili k najdôležitejšej časti – rozšifrovaniu významu jednotlivých bitov. Pomocou farebného kódovania (Labels) sme identifikovali štruktúru protokolu Hitag 2:
+                                </p>
+
+                                <div style="display: flex; justify-content: center; align-items: center; flex-direction: column; width: 100%; margin-bottom: 15px; margin-top: 15px;">
+                                        <img src="analyza.png" alt="Detailná analýza polí protokolu" class="img-fluid" style="border: 1px solid #ccc; margin: 20px 0;" width="80%">
+                                        <div>Obrázok 6: Detailná analýza polí protokolu</div>
+                                    </div>
+
+                                <p>Na základe porovnania viacerých nahrávok sme identifikovali tieto polia:</p>
+                                <table class="table table-bordered mt-3">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Farba</th>
+                                            <th>Názov poľa</th>
+                                            <th>Význam a funkcia</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td style="background-color: #7d4a4a; color: white;">Rúžová</td>
+                                            <td><strong>Syncword</strong></td>
+                                            <td>Synchronizačné slovo (0001) na začiatok komunikácie.</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="background-color: #8b4513; color: white;">Hnedá</td>
+                                            <td><strong>Car/Remote ID</strong></td>
+                                            <td>Unikátne sériové číslo (UID) kľúča (v našom prípade <code>8fe7de44</code>).</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="background-color: #0000ff; color: white;">Modrá</td>
+                                            <td><strong>Lock/Unlock</strong></td>
+                                            <td>Identifikátor povelu (napr. <code>0807</code> vs <code>0407</code>).</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="background-color: #ff0000; color: white;">Červená</td>
+                                            <td><strong>Counter</strong></td>
+                                            <td>Sekvenčné číslo paketu v rámci jedného stlačenia.</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="background-color: #00ff00;">Zelená</td>
+                                            <td><strong>Rolling Code / MAC</strong></td>
+                                            <td>Dynamicky sa meniaca kryptografická časť, ktorá chráni auto pred zneužitím.</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="background-color: #3e555d; color: white;">Tmavomodrá</td>
+                                            <td><strong>Checksum</strong></td>
+                                            <td>Kontrolný súčet na overenie integrity prijatých dát.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                             <div class="col-1"></div>
                         </div>
@@ -230,6 +353,14 @@
         </div>
 
         <div class="row">
+    <div class="col-1"></div>
+    <div class="col-10">
+        
+    </div>
+    <div class="col-1"></div>
+</div>
+
+        <div class="row">
             <div class="col-1"></div>
             <div class="col-10">
                 <div class="card">
@@ -238,9 +369,7 @@
                     </div>
                     <div class="card-body">
                         <ul style="a { all: unset; cursor: pointer; }">
-                            <li><a href="https://revealjs.com/"
-                                    style="all: unset; cursor: pointer;">https://chat.openai.com/</a></li>
-                            <li><a href="https://chat.openai.com/"
+                            <li><a href="https://gitlab.com/Torius_Minit/"
                                     style="all: unset; cursor: pointer;">https://gitlab.com/Torius_Minit - MinitCSS by
                                     Bc. Lukáš Horák</li>
                             <li><a href="https://m.media-amazon.com/images/I/61vpNX7rLNL._AC_.jpg"
