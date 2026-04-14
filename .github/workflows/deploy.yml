@@ -1,0 +1,43 @@
+name: Deploy static content to Pages
+
+on:
+  # Spustí se při každém pushi do větve main (pokud máš master, přepiš to)
+  push:
+    branches: ["master"]
+  # Umožňuje spustit workflow i manuálně z tabu Actions
+  workflow_dispatch:
+
+# Nastavení práv potřebných pro nasazení na GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Zabrání paralelnímu spouštění více nasazení najednou
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Cesta ke složce s tvým index.html. 
+          # '.' znamená kořenový adresář. Pokud ho máš třeba ve složce 'src', napiš './src'
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
