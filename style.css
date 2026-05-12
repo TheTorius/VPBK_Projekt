@@ -402,6 +402,7 @@ article {
     padding-bottom: 4%;
     
     overflow: scroll;
+    scroll-behavior: smooth;
 }
 
 /* -------------------------- Footer -------------------------- */
